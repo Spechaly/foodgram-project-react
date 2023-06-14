@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-=+*ny9i6%yhfyf643*z$-)-!@mas25l_a6uiamu9qfk-xnmg3p
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -37,6 +37,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Устанавливаю приложения для работы с DRF и аутентификацией
+    'rest_framework',
+    'rest_framework.authtoken',
+    'djoser',
+    # Регистрирую приложения
+    'users',
+    'recipes',
+    'api',
+    'core'
 ]
 
 MIDDLEWARE = [
@@ -80,6 +89,8 @@ DATABASES = {
     }
 }
 
+# Регистрирую новую модель юзера
+AUTH_USER_MODEL = 'users.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -99,11 +110,20 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'UTC'
 

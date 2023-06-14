@@ -169,7 +169,7 @@ class Favourite(models.Model):
         # Нужно чтобы не было повторяющихся столбцов, применим ограничение
         constraints = [
             UniqueConstraint(fields=['user', 'recipe'],
-                             name='unique_favourite')
+                             name='unique_favorite')
         ]
 
     def __str__(self):
@@ -178,7 +178,7 @@ class Favourite(models.Model):
         )
 
 
-class Shopping_list(models.Model):
+class ShoppingList(models.Model):
     '''Модель корзины покупок'''
     # При удалении юзера удаляется юзер
     user = models.ForeignKey(
