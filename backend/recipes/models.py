@@ -81,7 +81,7 @@ class Tag(models.Model):
     # Слаг должен быть уникальным
     slug = models.SlugField(
         verbose_name='Слаг тега',
-        max_length='246',
+        max_length='256',
         unique=True
     )
 
