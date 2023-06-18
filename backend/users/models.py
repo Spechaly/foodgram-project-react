@@ -5,11 +5,19 @@ from django.db.models import UniqueConstraint
 
 class User(AbstractUser):
     """Кастомная модель пользователя основанная на User"""
+
+    USER = 'user'
+    ADMIN = 'admin'
+    ROLE_CHOICES = [
+        (USER, 'user'),
+        (ADMIN, 'admin'),
+    ]
+
     # email делаю уникальным, чтобы можно было различать пользователей
     # при аутентификации
     email = models.EmailField(
         verbose_name='Почта',
-        max_length=256,
+        max_length=254,
         unique=True
     )
     # Для аутентификации используем код ниже, чтобы входить по email и password
@@ -20,6 +28,14 @@ class User(AbstractUser):
         'first_name',
         'last_name'
     ]
+
+    @property
+    def is_guest(self):
+        return self.role == self.GUEST
+
+    @property
+    def is_admin(self):
+        return self.role == self.ADMIN or self.is_superuser
 
     class Meta:
         # Добавлю наименования моделей в единственном и множественном числах
@@ -32,22 +48,22 @@ class User(AbstractUser):
         return self.username
 
 
-class Subscribe (models.Model):
+class Subscribtions (models.Model):
     """Модель содержащая в себе подписки на авторов"""
     # Связываю юзера подписок с моделью юзера методом многие-к-одному
     # c каскадным удалением связи, при удалении юзера
     user = models.ForeignKey(
         User,
         verbose_name='Подписчик',
-        related_name='subscriber',
+        related_name='follower',
         on_delete=models.CASCADE,
     )
     # Связываю автора рецепта модели подписок с моделью юзера методом
     # многие-к-одному c каскадным удалением связи, при удалении юзера(автора)
     author = models.ForeignKey(
         User,
-        verbose_name='Автор',
-        related_name='subscribing',
+        verbose_name='Автор на кого подписываются',
+        related_name='following',
         on_delete=models.CASCADE,
     )
 

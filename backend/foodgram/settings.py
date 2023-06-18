@@ -41,11 +41,12 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
+    'django_filters',
     # Регистрирую приложения
-    'users',
-    'recipes',
-    'api',
-    'core'
+    'users.apps.UsersConfig',
+    'recipes.apps.RecipesConfig',
+    'api.apps.ApiConfig',
+    #'core'
 ]
 
 MIDDLEWARE = [

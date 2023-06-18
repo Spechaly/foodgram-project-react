@@ -6,6 +6,27 @@ from django.db.models import UniqueConstraint
 User = get_user_model()
 
 
+class Ingredient(models.Model):
+    """Модель Ингредиентов"""
+    # !!! Пока сделаю уникальным
+    # еслиь будут повторы в литрах или граммах уберу!!!
+    name = models.CharField(
+        verbose_name='Название ингредиента',
+        max_length=256,
+        unique=True)
+    measurement_unit = models.CharField(
+        verbose_name='Единицы измерения',
+        max_length=256
+    )
+
+    class Meta:
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
+
+    def __str__(self):
+        return f'{self.name} измеряется в {self.measurement_unit}'
+
+
 class Recipe(models.Model):
     """Модель рецепта"""
     # Связываю автора рецепта модели рецептов с моделью юзера методом
@@ -26,13 +47,14 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         verbose_name='Изображение',
-        pload_to='recipes/')
+        upload_to='recipes/')
     # Связываю ингридиенты рецепта модели рецептов с моделью ингридиентов
     # связью многие-ко-многим c использованием промежуточной модели
     ingredients = models.ManyToManyField(
-        'Ingredient',
+        Ingredient,
         verbose_name='Ингридиенты в рецепте',
-        through='IngredientRecipe'
+        related_name='recipes',
+        through='IngredientInRecipe'
     )
     # Связываю теги рецепта модели рецептов с моделью тегов
     # отношением многие-ко-многим
@@ -44,9 +66,9 @@ class Recipe(models.Model):
     # валидацию в модели
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления, мин',
-        validators=(MinValueValidator(
+        validators=[MinValueValidator(
             1, message='Минимальное время приготовления 1 минута')
-        )
+        ]
     )
 
     class Meta:
@@ -74,14 +96,14 @@ class Tag(models.Model):
         validators=[
             RegexValidator(
                 regex='^#[A-Fa-f0-9]{6}$',
-                message='Введите значение цвета в HEX!'
+                message='Введите значение цвета в HEX! Пример:#FF0000'
             )
         ]
     )
     # Слаг должен быть уникальным
     slug = models.SlugField(
         verbose_name='Слаг тега',
-        max_length='256',
+        max_length=256,
         unique=True
     )
 
@@ -93,28 +115,7 @@ class Tag(models.Model):
         return self.name
 
 
-class Ingredient(models.Model):
-    """Модель Ингредиентов"""
-    # !!! Пока сделаю уникальным
-    # еслиь будут повторы в литрах или граммах уберу!!!
-    name = models.CharField(
-        verbose_name='Название ингредиента',
-        max_length=256,
-        unique=True)
-    measurement_unit = models.CharField(
-        verbose_name='Единицы измерения',
-        max_length=256
-    )
-
-    class Meta:
-        verbose_name = 'Ингредиент'
-        verbose_name_plural = 'Ингредиенты'
-
-    def __str__(self):
-        return f'{self.name} измеряется в {self.measurement_unit}'
-
-
-class IngredientRecipe(models.Model):
+class IngredientInRecipe(models.Model):
     """Промежуточная модель для связи рецепта и ингредиента"""
     recipe = models.ForeignKey(
         Recipe,
@@ -156,8 +157,8 @@ class Favourite(models.Model):
         on_delete=models.CASCADE
     )
     # Применяю каскадное удаление при удалении рецепта
-    recip = models.ForeignKey(
-        User,
+    recipe = models.ForeignKey(
+        Recipe,
         verbose_name='Рецепт в избранном',
         related_name='favorites',
         on_delete=models.CASCADE
@@ -174,7 +175,7 @@ class Favourite(models.Model):
 
     def __str__(self):
         return (
-            f'{self.user} добавил в избранное {self.recip}'
+            f'{self.user} добавил в избранное {self.recipe}'
         )
 
 
@@ -188,7 +189,7 @@ class ShoppingList(models.Model):
         on_delete=models.CASCADE
     )
     # При удалении рецепта удаляется рецепт
-    recip = models.ForeignKey(
+    recipe = models.ForeignKey(
         Recipe,
         verbose_name='Рецепт в корзине',
         related_name='shopping',
@@ -205,5 +206,5 @@ class ShoppingList(models.Model):
 
     def __str__(self):
         return (
-            f'{self.user} добавил в корзину {self.recip}'
+            f'{self.user} добавил в корзину {self.recipe}'
         )
