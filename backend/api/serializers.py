@@ -85,21 +85,6 @@ class UserWithRecipesSerializer(UserGetSerializer):
             'recipes_count'
         )
 
-    def validate(self, data):
-        author = self.instance
-        user = self.context.get('request').user
-        if Subscribtions.objects.filter(author=author, user=user).exists():
-            raise ValidationError(
-                detail='Вы уже подписаны на этого пользователя!',
-                code=status.HTTP_400_BAD_REQUEST
-            )
-        if user == author:
-            raise ValidationError(
-                detail='Нельзя подписаться на самого себя!',
-                code=status.HTTP_400_BAD_REQUEST
-            )
-        return data
-
     def get_is_subscribed(self, obj):
         user = self.context['request'].user
         if isinstance(user, AnonymousUser):
@@ -136,8 +121,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ingredient
-        # берем все поля модели
-        fields = '__all__'
+        fields = ('id', 'name', 'measurement_unit')
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -200,8 +184,8 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
 
 class RecipeGetSerializer(serializers.ModelSerializer):
     '''Сериализатор для модели Recipe. Для get /recipes/ и /recipes/id/'''
-    tags = TagSerializer(many=True, read_only=True)
     author = UserGetSerializer()
+    tags = TagSerializer(many=True, read_only=True)
     ingredients = IngredientInRecipeSerializer(
         source='IngredientsInRecipe',
         many=True,
@@ -225,21 +209,19 @@ class RecipeGetSerializer(serializers.ModelSerializer):
             'cooking_time'
         )
 
-    def get_is_favorited(self, obj):
-        request = self.context.get('request')
-        if request.user.is_anonymous:
-            return False
-
-        return Favourite.objects.filter(recipe=obj, user=request.user).exists()
-
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
         if request.user.is_anonymous:
             return False
-
         return ShoppingList.objects.filter(
             recipe=obj, user=request.user
         ).exists()
+
+    def get_is_favorited(self, obj):
+        request = self.context.get('request')
+        if request.user.is_anonymous:
+            return False
+        return Favourite.objects.filter(recipe=obj, user=request.user).exists()
 
 
 class RecipePostSerializer(serializers.ModelSerializer):

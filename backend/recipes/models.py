@@ -34,7 +34,7 @@ class Recipe(models.Model):
     author = models.ForeignKey(
         User,
         verbose_name='Автор рецепта',
-        related_name='recipe',
+        related_name='recipes',
         on_delete=models.SET_NULL,
         null=True
     )
@@ -60,6 +60,7 @@ class Recipe(models.Model):
     # отношением многие-ко-многим
     tags = models.ManyToManyField(
         'Tag',
+        related_name='recipes',
         verbose_name='Теги'
     )
     # Для отсечения отрицательного времени приготовления применим
@@ -120,13 +121,13 @@ class IngredientInRecipe(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         verbose_name='Рецепт',
-        related_name='amount',
+        related_name='IngredientsInRecipe',
         on_delete=models.CASCADE
     )
     ingredient = models.ForeignKey(
         Ingredient,
         verbose_name='Ингредиент',
-        related_name='amount',
+        related_name='IngredientsInRecipe',
         on_delete=models.CASCADE
     )
     # Для отсечения отрицательного числа ингредиентов применим
