@@ -12,8 +12,8 @@ class Ingredient(models.Model):
     # еслиь будут повторы в литрах или граммах уберу!!!
     name = models.CharField(
         verbose_name='Название ингредиента',
-        max_length=256,
-        unique=True)
+        max_length=256,)
+        #unique=True)
     measurement_unit = models.CharField(
         verbose_name='Единицы измерения',
         max_length=256

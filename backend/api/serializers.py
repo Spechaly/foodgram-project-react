@@ -7,8 +7,6 @@ from recipes.models import (
     Recipe, Ingredient, Tag, IngredientInRecipe,
     Favourite, ShoppingList
 )
-from rest_framework.exceptions import ValidationError
-from rest_framework import status
 from django.core.files.base import ContentFile
 
 

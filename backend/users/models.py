@@ -6,13 +6,6 @@ from django.db.models import UniqueConstraint
 class User(AbstractUser):
     """Кастомная модель пользователя основанная на User"""
 
-    USER = 'user'
-    ADMIN = 'admin'
-    ROLE_CHOICES = [
-        (USER, 'user'),
-        (ADMIN, 'admin'),
-    ]
-
     # email делаю уникальным, чтобы можно было различать пользователей
     # при аутентификации
     email = models.EmailField(
@@ -28,14 +21,6 @@ class User(AbstractUser):
         'first_name',
         'last_name'
     ]
-
-    @property
-    def is_guest(self):
-        return self.role == self.GUEST
-
-    @property
-    def is_admin(self):
-        return self.role == self.ADMIN or self.is_superuser
 
     class Meta:
         # Добавлю наименования моделей в единственном и множественном числах

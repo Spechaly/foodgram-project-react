@@ -21,7 +21,7 @@ services:
       - ./.env
 
   frontend:
-    image: baluev37/foodgram-frontend:latest
+    image: baluev37/frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
   

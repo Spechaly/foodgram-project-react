@@ -6,7 +6,7 @@ from .serializers import (
     RecipeShortSerializer, RecipePostSerializer, SubscriptionSerializer,
     ShoppingCartSerializer, FavoriteSerializer
 )
-from .filters import RecipeFilter
+from .filters import RecipeFilter, IngredientFilter
 from django.db.models import F, Sum
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -134,7 +134,7 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     # нужно проверить
-    search_fields = ('^name',)
+    filterset_class = IngredientFilter
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -233,7 +233,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         user = request.user
         ingredients = IngredientInRecipe.objects.filter(
-            recipe__shopping_cart__user=user).values(
+            recipe__shopping__user=user).values(
             name=F('ingredient__name'),
             measurement_unit=F('ingredient__measurement_unit')).annotate(
             amount=Sum('amount')
