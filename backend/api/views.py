@@ -195,13 +195,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=['PPST', 'DELETE'],
+        methods=['POST', 'DELETE'],
         permission_classes=[IsAuthenticated]
     )
     def shopping_cart(self, request, **kwargs):
-        recipe = get_object_or_404(Recipe, id=kwargs['pk'])
+        recipes = get_object_or_404(Recipe, id=kwargs['pk'])
         data = request.data.copy()
-        data.update({'recipe': recipe.id})
+        data.update({'recipe': recipes.id})
         serializer = ShoppingCartSerializer(
             data=data, context={'request': request}
             )
@@ -210,11 +210,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(
                 status=status.HTTP_201_CREATED,
-                data=self.get_serializer(recipe).data
+                data=self.get_serializer(recipes).data
             )
         else:
             shopping = ShoppingList.objects.filter(
-                recipe=recipe, user=request.user
+                recipe=recipes, user=request.user
             )
             if not shopping.exists():
                 return Response(

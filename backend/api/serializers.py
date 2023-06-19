@@ -360,8 +360,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
 class ShoppingCartSerializer(serializers.ModelSerializer):
     """Сериализатор для списка покупок."""
     user = serializers.PrimaryKeyRelatedField(
-        read_only=True, default=serializers.CurrentUserDefault()
-    )
+        read_only=True, default=serializers.CurrentUserDefault())
     recipe = serializers.PrimaryKeyRelatedField(
         queryset=Recipe.objects.all(),
         write_only=True,
