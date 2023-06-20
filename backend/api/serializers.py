@@ -154,7 +154,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     def validate_author(self, value):
         if self.context.get('request').user == value:
             raise serializers.ValidationError({
-                'errors': 'Подписка на самого себя не возможна!'
+                'errors': 'Не возможно подписатся на себя'
             })
         return value
 
@@ -274,7 +274,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
         if cooking_time <= 0:
             raise serializers.ValidationError(
                 {
-                    'error': 'Время приготовления не должно быть менее 1 мин.'
+                    'error': 'Время приготовления не должно быть менее 1 минуты'
                 }
             )
         ingredients_list = []
@@ -283,14 +283,14 @@ class RecipePostSerializer(serializers.ModelSerializer):
             if ingredient.get('amount') <= 0:
                 raise serializers.ValidationError(
                     {
-                        'error': 'Ингредиентов не должно быть менее одного.'
+                        'error': 'Ингредиентов не должно быть менее одного'
                     }
                 )
             ingredients_list.append(ingredient['ingredient']['id'])
         if len(ingredients_list) > len(set(ingredients_list)):
             raise serializers.ValidationError(
                 {
-                    'error': 'Ингредиенты в рецепте не должны повторяться.'
+                    'error': 'Ингредиенты в рецепте не должны повторяться'
                 }
             )
         return data
@@ -346,7 +346,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
             serializers.UniqueTogetherValidator(
                 queryset=Favourite.objects.all(),
                 fields=['recipe', 'user', ],
-                message='Этот рецепт уже добавлен в избранное.'
+                message='Этот рецепт уже добавлен в избранно'
             )
         ]
 
@@ -371,7 +371,7 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
             serializers.UniqueTogetherValidator(
                 queryset=ShoppingList.objects.all(),
                 fields=['recipe', 'user', ],
-                message='Этот рецепт уже добавлен в список покупок.'
+                message='Этот рецепт уже добавлен в список покупок'
             )
         ]
 

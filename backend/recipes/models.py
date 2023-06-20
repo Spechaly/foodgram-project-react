@@ -97,7 +97,7 @@ class Tag(models.Model):
         validators=[
             RegexValidator(
                 regex='^#[A-Fa-f0-9]{6}$',
-                message='Введите значение цвета в HEX! Пример:#FF0000'
+                message='Введите значение цвета в HEX! Пример:#49B64E'
             )
         ]
     )
