@@ -1,30 +1,28 @@
-from .pagination import PageLimitPagination
-from .permissions import IsAuthorOrAdminOrReadOnly
-from .serializers import (
-    UserWithRecipesSerializer, UserGetSerializer, UserPostSerializer,
-    RecipeGetSerializer, IngredientSerializer, TagSerializer,
-    RecipeShortSerializer, RecipePostSerializer, SubscriptionSerializer,
-    ShoppingCartSerializer, FavoriteSerializer
-)
-from .filters import RecipeFilter, IngredientFilter
-from .add_and_del import add_and_del
+from django.contrib.auth import update_session_auth_hash
 from django.db.models import F, Sum
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from djoser.serializers import SetPasswordSerializer
+from recipes.models import (Favourite, Ingredient, IngredientInRecipe, Recipe,
+                            ShoppingList, Tag)
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.viewsets import ReadOnlyModelViewSet
-from rest_framework import filters
-from users.models import User, Subscribtions
-from django.http import HttpResponse
-from recipes.models import (
-    Ingredient, Tag, Recipe, Favourite,
-    ShoppingList, IngredientInRecipe
-)
-from rest_framework import viewsets, status, mixins
-from djoser.serializers import SetPasswordSerializer
-from django.contrib.auth import update_session_auth_hash
-from django.shortcuts import get_object_or_404
+from users.models import Subscribtions, User
+
+from .add_and_del import add_and_del
+from .filters import IngredientFilter, RecipeFilter
+from .pagination import PageLimitPagination
+from .permissions import IsAuthorOrAdminOrReadOnly
+from .serializers import (FavoriteSerializer, IngredientSerializer,
+                          RecipeGetSerializer, RecipePostSerializer,
+                          RecipeShortSerializer, ShoppingCartSerializer,
+                          SubscriptionSerializer, TagSerializer,
+                          UserGetSerializer, UserPostSerializer,
+                          UserWithRecipesSerializer)
 
 
 # Применю миксины для удобства управления пользователями
@@ -104,7 +102,7 @@ class CustomUserViewSet(
         data.update({'author': user.id})
         serializer = SubscriptionSerializer(
             data=data, context={'request': request}
-            )
+        )
         if request.method == "POST":
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -164,7 +162,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return add_and_del(
             self, request,
             FavoriteSerializer, Favourite, **kwargs
-            )
+        )
 
     @action(
         detail=True,
@@ -175,7 +173,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return add_and_del(
             self, request,
             ShoppingCartSerializer, ShoppingList, **kwargs
-            )
+        )
 
     @action(
         detail=False,

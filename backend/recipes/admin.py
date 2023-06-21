@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models import (
-    Recipe, Ingredient,
-    Tag, IngredientInRecipe, Favourite, ShoppingList)
+
+from .models import (Favourite, Ingredient, IngredientInRecipe, Recipe,
+                     ShoppingList, Tag)
 
 
 # Регистрирую модель рецепта в админку с полями автор и название

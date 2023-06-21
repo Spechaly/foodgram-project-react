@@ -1,12 +1,10 @@
-from .fields import Base64ImageField
-from djoser.serializers import UserSerializer, UserCreateSerializer
+from djoser.serializers import UserCreateSerializer, UserSerializer
+from recipes.models import (Favourite, Ingredient, IngredientInRecipe, Recipe,
+                            ShoppingList, Tag)
 from rest_framework import serializers
-from django.contrib.auth.models import AnonymousUser
-from users.models import User, Subscribtions
-from recipes.models import (
-    Recipe, Ingredient, Tag, IngredientInRecipe,
-    Favourite, ShoppingList
-)
+from users.models import Subscribtions, User
+
+from .fields import Base64ImageField
 
 
 class UserGetSerializer(UserSerializer):
