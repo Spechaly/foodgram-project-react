@@ -7,6 +7,7 @@ from .serializers import (
     ShoppingCartSerializer, FavoriteSerializer
 )
 from .filters import RecipeFilter, IngredientFilter
+from .add_and_del import add_and_del
 from django.db.models import F, Sum
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -111,35 +112,30 @@ class CustomUserViewSet(
                 status=status.HTTP_201_CREATED,
                 data=self.get_serializer(user).data
             )
-
-        else:
-            subscription = Subscribtions.objects.filter(
-                author=user, user=request.user
-            )
-            if not subscription.exists():
-                return Response(
-                    {'errors': 'Вы не подписаны на этого пользователя'},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            subscription.delete()
+        subscription = Subscribtions.objects.filter(
+            author=user, user=request.user
+        )
+        if not subscription.exists():
             return Response(
-                {'errors': 'Успешная отписка'},
-                status=status.HTTP_204_NO_CONTENT)
+                {'errors': 'Вы не подписаны на этого пользователя'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        subscription.delete()
+        return Response(
+            {'errors': 'Успешная отписка'},
+            status=status.HTTP_204_NO_CONTENT)
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
     """Обработка операций с ингредиентами"""
-    # Беру все ингредиенты в обработку
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    # нужно проверить
     filterset_class = IngredientFilter
 
 
 class TagViewSet(ReadOnlyModelViewSet):
     """Обработка операций с тегами"""
-    # Беру все ингредиенты в обработку
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
 
@@ -152,7 +148,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
     pagination_class = PageLimitPagination
 
-    # Выбор сериализатора в зависимости от метода
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return RecipeGetSerializer
@@ -166,32 +161,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated]
     )
     def favorite(self, request, **kwargs):
-        recipe = get_object_or_404(Recipe, id=kwargs['pk'])
-        data = request.data.copy()
-        data.update({'recipe': recipe.id})
-        serializer = FavoriteSerializer(
-            data=data, context={'request': request}
+        return add_and_del(
+            self, request,
+            FavoriteSerializer, Favourite, **kwargs
             )
-        if request.method == "POST":
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(
-                status=status.HTTP_201_CREATED,
-                data=self.get_serializer(recipe).data
-            )
-        else:
-            favorite = Favourite.objects.filter(
-                recipe=recipe, user=request.user
-            )
-            if not favorite.exists():
-                return Response(
-                    {'errors': 'В списке избранного нет этого рецепта'},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            favorite.delete()
-            return Response(
-                {'errors': 'Успешное удаление рецепта из избранного'},
-                status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=True,
@@ -199,32 +172,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated]
     )
     def shopping_cart(self, request, **kwargs):
-        recipes = get_object_or_404(Recipe, id=kwargs['pk'])
-        data = request.data.copy()
-        data.update({'recipe': recipes.id})
-        serializer = ShoppingCartSerializer(
-            data=data, context={'request': request}
+        return add_and_del(
+            self, request,
+            ShoppingCartSerializer, ShoppingList, **kwargs
             )
-        if request.method == "POST":
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(
-                status=status.HTTP_201_CREATED,
-                data=self.get_serializer(recipes).data
-            )
-        else:
-            shopping = ShoppingList.objects.filter(
-                recipe=recipes, user=request.user
-            )
-            if not shopping.exists():
-                return Response(
-                    {'errors': 'В списке корзины нет этого рецепта'},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            shopping.delete()
-            return Response(
-                {'errors': 'Успешное удаление рецепта из корзины'},
-                status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False,
@@ -236,7 +187,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             recipe__shopping__user=user).values(
             name=F('ingredient__name'),
             measurement_unit=F('ingredient__measurement_unit')).annotate(
-            amount=Sum('amount')
+            number=Sum('amount')
         )
         data = []
         for ingredient in ingredients:

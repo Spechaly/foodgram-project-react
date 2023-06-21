@@ -7,7 +7,6 @@ from .views import (
 
 app_name = 'api'
 
-# Применю дефолтроутер чтобы не  прописывать все эндпоинты
 router = DefaultRouter()
 
 router.register('ingredients', IngredientViewSet, basename='ingredients')

@@ -8,12 +8,9 @@ User = get_user_model()
 
 class Ingredient(models.Model):
     """Модель Ингредиентов"""
-    # !!! Пока сделаю уникальным
-    # еслиь будут повторы в литрах или граммах уберу!!!
     name = models.CharField(
         verbose_name='Название ингредиента',
         max_length=256,)
-        #unique=True)
     measurement_unit = models.CharField(
         verbose_name='Единицы измерения',
         max_length=256
@@ -130,8 +127,6 @@ class IngredientInRecipe(models.Model):
         related_name='IngredientsInRecipe',
         on_delete=models.CASCADE
     )
-    # Для отсечения отрицательного числа ингредиентов применим
-    # валидацию в модели
     amount = models.PositiveSmallIntegerField(
         verbose_name='Количество',
         validators=[MinValueValidator(1, message='Минимальное количество 1!')]
@@ -140,6 +135,10 @@ class IngredientInRecipe(models.Model):
     class Meta:
         verbose_name = 'Количество ингредиента'
         verbose_name_plural = 'Количество ингредиентов'
+        constraints = [
+            UniqueConstraint(fields=['recipe', 'ingredient'],
+                             name='unique_ingredient')
+        ]
 
     def __str__(self):
         return (
