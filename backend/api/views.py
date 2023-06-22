@@ -13,7 +13,6 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from users.models import Subscribtions, User
 
-from .add_and_del import add_and_del
 from .filters import IngredientFilter, RecipeFilter
 from .pagination import PageLimitPagination
 from .permissions import IsAuthorOrAdminOrReadOnly
@@ -23,19 +22,19 @@ from .serializers import (FavoriteSerializer, IngredientSerializer,
                           SubscriptionSerializer, TagSerializer,
                           UserGetSerializer, UserPostSerializer,
                           UserWithRecipesSerializer)
+from .utills import add_and_del
 
 
-# Применю миксины для удобства управления пользователями
 class CustomUserViewSet(
         mixins.CreateModelMixin, mixins.ListModelMixin,
         mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """Класс управления пользователями"""
     queryset = User.objects.all()
     pagination_class = PageLimitPagination
 
     def get_instance(self):
         return self.request.user
 
-    # прописываю какие функции выполняются при том или ином запросе
     def get_serializer_class(self):
         if self.action in ['subscriptions', 'subscribe']:
             return UserWithRecipesSerializer
@@ -44,19 +43,16 @@ class CustomUserViewSet(
         elif self.request.method == 'POST':
             return UserPostSerializer
 
-    # Добавляю условие доступа
     def get_permissions(self):
         if self.action == 'retrieve':
             self.permission_classes = [IsAuthenticated]
         return super(self.__class__, self).get_permissions()
 
-    # Get на me только зарегистрированным пользователям
     @action(detail=False, permission_classes=[IsAuthenticated])
     def me(self, request, *args, **kwargs):
         self.get_object = self.get_instance
         return self.retrieve(request, *args, **kwargs)
 
-    # Post запрос на изменение пароля
     @action(["POST"], detail=False, permission_classes=[IsAuthenticated])
     def set_password(self, request, *args, **kwargs):
         serializer = SetPasswordSerializer(
@@ -68,7 +64,6 @@ class CustomUserViewSet(
         update_session_auth_hash(self.request, self.request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    # Запрос с подписками
     @action(
         detail=False,
         permission_classes=[IsAuthenticated]
@@ -90,7 +85,6 @@ class CustomUserViewSet(
             users, many=True, context={'request': request}
         ).data)
 
-    # Отписаться подписаться на пользователя
     @action(
         ["POST", "DELETE"],
         detail=True,
@@ -191,7 +185,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         for ingredient in ingredients:
             data.append(
                 f'{ingredient["name"]} - '
-                f'{ingredient["amount"]} '
+                f'{ingredient["number"]} '
                 f'{ingredient["measurement_unit"]}'
             )
         content = 'Список покупок:\n\n' + '\n'.join(data)

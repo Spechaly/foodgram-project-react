@@ -153,7 +153,7 @@ class RecipeGetSerializer(serializers.ModelSerializer):
     author = UserGetSerializer()
     tags = TagSerializer(many=True, read_only=True)
     ingredients = IngredientInRecipeSerializer(
-        source='IngredientsInRecipe',
+        source='ingredients_in_recipe',
         many=True,
         read_only=True
     )
@@ -201,7 +201,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
         queryset=Tag.objects.all()
     )
     ingredients = IngredientInRecipeSerializer(
-        source='IngredientsInRecipe',
+        source='ingredients_in_recipe',
         many=True,
     )
     image = Base64ImageField(
@@ -241,7 +241,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
                 }
             )
         ingredients_list = []
-        ingredients_in_recipe = data.get('IngredientsInRecipe')
+        ingredients_in_recipe = data.get('ingredients_in_recipe')
         for ingredient in ingredients_in_recipe:
             if ingredient.get('amount') <= 0:
                 raise serializers.ValidationError(
@@ -260,7 +260,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         author = self.context.get('request').user
-        ingredients = validated_data.pop('IngredientsInRecipe')
+        ingredients = validated_data.pop('ingredients_in_recipe')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data, author=author)
         recipe.tags.add(*tags)
@@ -268,15 +268,13 @@ class RecipePostSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        ingredients = validated_data.pop('IngredientsInRecipe')
+        ingredients = validated_data.pop('ingredients_in_recipe')
         tags = validated_data.pop('tags')
         instance = super().update(instance, validated_data)
         instance.tags.clear()
         instance.tags.add(*tags)
         instance.ingredients.clear()
-        recipe = instance
-        self.save_ingredients(recipe, ingredients)
-        instance.save()
+        self.save_ingredients(recipe=instance, ingredients=ingredients)
         return instance
 
     def to_representation(self, instance):
