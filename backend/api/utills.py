@@ -1,7 +1,8 @@
 from django.shortcuts import get_object_or_404
-from recipes.models import Recipe
 from rest_framework import status
 from rest_framework.response import Response
+
+from recipes.models import Recipe
 
 
 def add_and_del(self, request, serializer, model, **kwargs):

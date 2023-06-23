@@ -1,9 +1,9 @@
 from djoser.serializers import UserCreateSerializer, UserSerializer
+from rest_framework import serializers
+
 from recipes.models import (Favourite, Ingredient, IngredientInRecipe, Recipe,
                             ShoppingList, Tag)
-from rest_framework import serializers
 from users.models import Subscribtions, User
-
 from .fields import Base64ImageField
 
 

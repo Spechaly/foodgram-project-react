@@ -1,5 +1,5 @@
-from django_filters import rest_framework
 from django_filters import rest_framework as filters
+
 from recipes.models import Ingredient, Recipe, Tag
 
 
@@ -11,7 +11,7 @@ class RecipeFilter(filters.FilterSet):
         to_field_name='slug',
         queryset=Tag.objects.all()
     )
-    author = rest_framework.NumberFilter(
+    author = filters.NumberFilter(
         field_name='author',
         lookup_expr='exact'
     )

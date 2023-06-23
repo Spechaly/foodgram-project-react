@@ -26,8 +26,6 @@ class Ingredient(models.Model):
 
 class Recipe(models.Model):
     """Модель рецепта"""
-    # Связываю автора рецепта модели рецептов с моделью юзера методом
-    # многие-к-одному c сохранением рецепта при удалении автора
     author = models.ForeignKey(
         User,
         verbose_name='Автор рецепта',
@@ -45,23 +43,17 @@ class Recipe(models.Model):
     image = models.ImageField(
         verbose_name='Изображение',
         upload_to='recipes/')
-    # Связываю ингридиенты рецепта модели рецептов с моделью ингридиентов
-    # связью многие-ко-многим c использованием промежуточной модели
     ingredients = models.ManyToManyField(
         Ingredient,
         verbose_name='Ингридиенты в рецепте',
         related_name='recipes',
         through='IngredientInRecipe'
     )
-    # Связываю теги рецепта модели рецептов с моделью тегов
-    # отношением многие-ко-многим
     tags = models.ManyToManyField(
         'Tag',
         related_name='recipes',
         verbose_name='Теги'
     )
-    # Для отсечения отрицательного времени приготовления применим
-    # валидацию в модели
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления, мин',
         validators=[MinValueValidator(
@@ -79,14 +71,11 @@ class Recipe(models.Model):
 
 class Tag(models.Model):
     """Модель тегов"""
-    # Название тега должно быть уникальным
     name = models.CharField(
         verbose_name='Наименование тега',
         max_length=256,
         unique=True
     )
-    # Для цвета hex кода нужно отсечь не нужные комбинации,
-    # пропишем регулярными выражениями ограничения
     color = models.CharField(
         verbose_name='HEX цвет',
         unique=True,
@@ -98,7 +87,6 @@ class Tag(models.Model):
             )
         ]
     )
-    # Слаг должен быть уникальным
     slug = models.SlugField(
         verbose_name='Слаг тега',
         max_length=256,
@@ -149,14 +137,12 @@ class IngredientInRecipe(models.Model):
 
 class Favourite(models.Model):
     """Модель избранного"""
-    # Применяю каскадное удаление при удалении юзера
     user = models.ForeignKey(
         User,
         verbose_name='Юзер с избранным',
         related_name='favorites',
         on_delete=models.CASCADE
     )
-    # Применяю каскадное удаление при удалении рецепта
     recipe = models.ForeignKey(
         Recipe,
         verbose_name='Рецепт в избранном',
@@ -167,7 +153,6 @@ class Favourite(models.Model):
     class Meta:
         verbose_name = 'Избраный'
         verbose_name_plural = 'Избранные'
-        # Нужно чтобы не было повторяющихся столбцов, применим ограничение
         constraints = [
             UniqueConstraint(fields=['user', 'recipe'],
                              name='unique_favorite')
@@ -181,14 +166,12 @@ class Favourite(models.Model):
 
 class ShoppingList(models.Model):
     '''Модель корзины покупок'''
-    # При удалении юзера удаляется юзер
     user = models.ForeignKey(
         User,
         verbose_name='Юзер',
         related_name='shopping',
         on_delete=models.CASCADE
     )
-    # При удалении рецепта удаляется рецепт
     recipe = models.ForeignKey(
         Recipe,
         verbose_name='Рецепт в корзине',
@@ -198,7 +181,6 @@ class ShoppingList(models.Model):
 
     class Meta:
         verbose_name = 'Список покупок'
-        # Нужно чтобы не было повторяющихся столбцов, применим ограничение
         constraints = [
             UniqueConstraint(fields=['user', 'recipe'],
                              name='unique_shopping_list')
