@@ -52,8 +52,7 @@ class UserWithRecipesSerializer(UserGetSerializer):
 
     class Meta(UserGetSerializer.Meta):
         model = User
-        fields = (
-            UserGetSerializer.Meta.fields,
+        fields = UserGetSerializer.Meta.fields + (
             'recipes',
             'recipes_count'
         )
