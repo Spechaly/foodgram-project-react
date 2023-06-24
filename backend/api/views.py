@@ -81,7 +81,7 @@ class CustomUserViewSet(
         serializer = UserWithRecipesSerializer(
             users, many=True, context={'request': request}
         )
-        return Response(UserWithRecipesSerializer(
+        return self.get_paginated_response(UserWithRecipesSerializer(
             users, many=True, context={'request': request}
         ).data)
 
