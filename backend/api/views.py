@@ -73,9 +73,17 @@ class CustomUserViewSet(
             following__user=request.user
         ).prefetch_related('recipes')
         page = self.paginate_queryset(users)
+        if page is not None:
+            serializer = UserWithRecipesSerializer(
+                page, many=True,
+                context={'request': request})
+            return self.get_paginated_response(serializer.data)
         serializer = UserWithRecipesSerializer(
-            page, many=True, context={'request': request})
-        return self.get_paginated_response(serializer.data)
+            users, many=True, context={'request': request}
+        )
+        return Response(UserWithRecipesSerializer(
+            users, many=True, context={'request': request}
+        ).data)
 
     @action(
         ["POST", "DELETE"],

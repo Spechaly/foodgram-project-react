@@ -1,8 +1,6 @@
-from django.core import paginator
-from rest_framework.pagination import PageNumberPagination
+from rest_framework import pagination
 
 
-class PageLimitPagination(PageNumberPagination):
-    django_paginator_class = paginator.Paginator
+class PageLimitPagination(pagination.PageNumberPagination):
+    """Кастомный пагинатор для установки лимита"""
     page_size_query_param = 'limit'
-    page_size = 6
