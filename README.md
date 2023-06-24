@@ -6,7 +6,7 @@
 Проект Foodgram - это продуктовый помошник, в котором вы можете создавать рецепты, добавлять их в избранные, подписываться на людей и следить за их новинками кулинарии. Так же доступен для скачивания чеклист,чтобы сходить в магазин и купить все необходимое в рецепте!  
 
 
-## Установка
+## Установка для локального пользования
 
 - Клонировать репозиторий с github:
 ```git clone ... ```
@@ -31,7 +31,46 @@
 - Можно пользоваться проектом по ссылке:
 ```http://localhost```
 
-http://158.160.70.34/
+
+## Установка для разворачивания проекта на сервере
+
+- Клонировать репозиторий с github:
+```git clone ... ```
+- Установить на сервере Docker, Docker Compose.
+- Скопировать на сервер файлы docker-compose.yml, nginx.conf из папки infra:
+```scp docker-compose.yml nginx.conf username@IP:/home/username/   # username - имя пользователя на сервере```
+                                                                ```# IP - публичный IP сервера```
+- Для работы с GitHub Actions необходимо в репозитории в разделе Secrets > Actions создать переменные окружения:
+```
+SECRET_KEY              # секретный ключ Django проекта
+DOCKER_PASSWORD         # пароль от Docker Hub
+DOCKER_USERNAME         # логин Docker Hub
+HOST                    # публичный IP сервера
+USER                    # имя пользователя на сервере
+PASSPHRASE              # *если ssh-ключ защищен паролем
+SSH_KEY                 # приватный ssh-ключ
+
+DB_ENGINE               # django.db.backends.postgresql
+DB_NAME                 # postgres
+POSTGRES_USER           # postgres
+POSTGRES_PASSWORD       # postgres
+DB_HOST                 # db
+DB_PORT                 # 5432 (порт по умолчанию)```
+```
+- Cоздать и запустить контейнеры Docker:
+```sudo docker-compose up -d```
+- Выполнить миграции:
+```sudo docker-compose exec backend python manage.py migrate```
+- Создать суперпользователя:
+```sudo docker-compose exec backend python manage.py createsuperuser```
+- Создать статику:
+```sudo docker-compose exec backend python manage.py collectstatic --noinput:```
+- Выполнить команду для загрузки ингридиентов::
+```sudo docker-compose exec backend python manage.py loadingridientsdata```
+
+- Можно пользоваться проектом по ссылке:
+```http://158.160.70.34/```
+
 
 ## Автор проекта:
 - Евгений Балуев
